@@ -2,3 +2,6 @@
 data/processed/*.csv
 data/*
 .venv
+*.png
+*.out
+__pycache__

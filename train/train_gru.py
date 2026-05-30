@@ -2,8 +2,6 @@
 train/train_gru.py
 
 GRU dynamics baseline — discrete-time alternative to the Neural ODE.
-Same setup as train_node.py; only the dynamics model changes.
-
 Checkpoint and losses saved to results_dir.
 """
 
@@ -16,7 +14,7 @@ from torch.utils.data import DataLoader
 from config import ODE_LR, ODE_EPOCHS, BATCH_SIZE, LATENT_DIM, ODE_HIDDEN, WINDOW_SIZE, STRIDE
 from utils.datasets import ArgoLatentDataset
 from models.gru import GRUDynamics
-from train.train_node import SlidingWindowDataset
+from utils.probe_utils import SlidingWindowDataset
 from utils.loss_logger import LossLogger
 
 

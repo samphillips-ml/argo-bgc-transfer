@@ -1,13 +1,9 @@
 """
 train/train_probe_static.py
 
-Trains the probe head on frozen encoder output directly — no NODE, no
-trajectory. Fair comparison against the NODE probe since the probe head
-is trained fresh under the same conditions.
-
-Usage (from main.py or standalone):
-    from train.train_probe_static import train_probe_static
-    train_probe_static(probe_dataset, encoder, results_dir=results_dir)
+Static latent probe — frozen encoder output directly, no dynamics model.
+Fair comparison against GRU probe since probe head is trained fresh.
+Checkpoint and losses saved to results_dir.
 """
 
 import os
@@ -21,7 +17,7 @@ from config import (
     DECODER_HIDDEN, PROBE_EPOCHS, PROBE_LR,
 )
 from models.probe_decoder import OxygenDecoderHead
-from train.train_probe import (
+from utils.probe_utils import (
     SlidingWindowProbeDataset, masked_mse,
     encode_profiles, compute_oxy_stats,
 )
@@ -96,7 +92,6 @@ def train_probe_static(
             profile_flat  = profile.reshape(B * W, D, n_in)
             mask_flat     = mask.reshape(B * W, D, n_in)
 
-            # encode directly — no NODE
             p_flat      = encode_profiles(encoder, profile_flat, mask_flat, device)
             target_flat = target.reshape(B * W, D, target.shape[-1])
             target_norm = (target_flat - oxy_mean_t) / oxy_std_t

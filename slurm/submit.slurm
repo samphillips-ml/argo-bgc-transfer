@@ -28,7 +28,7 @@ ln -s $(realpath $RUN_DIR) results/slurm_${SLURM_JOBID}
 source ~/envs/ocean/bin/activate
 export PYTHONPATH=$SLURM_SUBMIT_DIR${PYTHONPATH:+:$PYTHONPATH}
 
-python -u main.py --stage all --results_dir $RUN_DIR
+python -u run/main.py --stage all --results_dir $RUN_DIR
 
 echo "======================================================"
 echo "End Time : $(date)"

@@ -1,9 +1,7 @@
 """
 train/train_gru_probe.py
 
-Stage: GRU probe — frozen encoder + frozen GRU, train target variable decoder.
-Direct parallel to train_probe.py but using GRUDynamics instead of ODEFunc.
-
+GRU probe — frozen encoder + frozen GRU, train target variable decoder.
 Checkpoint and losses saved to results_dir.
 """
 
@@ -18,7 +16,7 @@ from config import (
 )
 from models.gru import GRUDynamics
 from models.probe_decoder import OxygenDecoderHead
-from train.train_probe import (
+from utils.probe_utils import (
     SlidingWindowProbeDataset,
     masked_mse,
     encode_profiles,

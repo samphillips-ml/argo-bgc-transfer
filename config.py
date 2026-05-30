@@ -40,6 +40,7 @@ DECODER_HIDDEN = [64, 64]
 ODE_HIDDEN     = [128, 128, 128]
 
 ## Training ##
+ENCODER_TYPE = "cnn"   # "mlp" or "cnn"
 ENCODER_LR     = 1e-3
 ENCODER_EPOCHS = 80
 ODE_LR         = 1e-4

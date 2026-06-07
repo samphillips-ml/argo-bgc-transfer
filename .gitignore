@@ -5,3 +5,4 @@ data/*
 *.png
 *.out
 __pycache__
+*.py

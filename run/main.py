@@ -4,18 +4,15 @@ import torch
 
 from config import (
     LOW_DRIFT_PATH, INTERP_PATH,
-    LATENT_DIM, ENCODER_HIDDEN, DECODER_HIDDEN, ODE_HIDDEN,
+    LATENT_DIM, ENCODER_HIDDEN, DECODER_HIDDEN,
 )
 from utils.split import build_splits
 from utils.datasets import ArgoProfileDataset, ArgoLatentDataset, ArgoProbeDataset
 from models.autoencoder import Autoencoder
-from models.gru import GRUDynamics
 from train.train_encoder import train_encoder
 from train.train_probe_static import train_probe_static
 from train.train_probe_raw import train_probe_raw
 from train.train_probe_baseline import train_probe_baseline
-from train.train_gru import train_gru
-from train.train_gru_probe import train_gru_probe
 from utils.seeding import set_seed
 
 set_seed()
@@ -62,12 +59,6 @@ def stage_encode(results_dir, checkpoint_path=None, latent_path=None):
     return latent_train, latent_val, latent_probe, wmo_to_idx
 
 
-def stage_gru(results_dir, latent_path=None):
-    print("=== Stage: gru ===")
-    latent_path = latent_path or f"{results_dir}/latent_cycles.pt"
-    return train_gru(latent_path=latent_path, results_dir=results_dir)
-
-
 def _load_probe_dataset(checkpoint_path):
     device   = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     df, _    = build_splits(LOW_DRIFT_PATH, INTERP_PATH)
@@ -84,20 +75,6 @@ def _load_probe_dataset_no_encoder():
     probe_ds = ArgoProbeDataset(df, split="probe", stats=train_ds.stats)
     print(f"Probe casts: {len(probe_ds)}")
     return probe_ds
-
-
-def stage_gru_probe(results_dir, autoencoder_checkpoint=None, gru_checkpoint=None):
-    print("=== Stage: gru_probe ===")
-    autoencoder_checkpoint = autoencoder_checkpoint or f"{results_dir}/autoencoder_best.pt"
-    gru_checkpoint         = gru_checkpoint         or f"{results_dir}/gru_best.pt"
-
-    probe_ds, encoder, device = _load_probe_dataset(autoencoder_checkpoint)
-
-    gru      = GRUDynamics(latent_dim=LATENT_DIM, hidden=ODE_HIDDEN).to(device)
-    gru_ckpt = torch.load(gru_checkpoint, map_location=device, weights_only=False)
-    gru.load_state_dict(gru_ckpt["model_state"])
-
-    return train_gru_probe(probe_ds, encoder, gru, results_dir=results_dir)
 
 
 def stage_probe_static(results_dir, autoencoder_checkpoint=None):
@@ -123,11 +100,7 @@ def stage_probe_baseline(results_dir, autoencoder_checkpoint=None):
     return train_probe_baseline(probe_ds, results_dir=results_dir)
 
 
-STAGES = [
-    "encoder", "encode", "gru",
-    "gru_probe", "probe_static", "probe_raw", "probe_baseline",
-    "all",
-]
+STAGES = ["encoder", "encode", "probe_static", "probe_raw", "probe_baseline", "all"]
 
 
 def main():
@@ -135,9 +108,8 @@ def main():
     parser.add_argument("--stage",       type=str, choices=STAGES, default="all")
     parser.add_argument("--results_dir", type=str, required=True,
                         help="Directory for all outputs (checkpoints, CSVs, figures)")
-    parser.add_argument("--checkpoint",     type=str, default=None)
-    parser.add_argument("--gru_checkpoint", type=str, default=None)
-    parser.add_argument("--latent",         type=str, default=None)
+    parser.add_argument("--checkpoint", type=str, default=None)
+    parser.add_argument("--latent",     type=str, default=None)
     args = parser.parse_args()
 
     os.makedirs(args.results_dir, exist_ok=True)
@@ -147,10 +119,6 @@ def main():
         stage_encoder(rd)
     elif args.stage == "encode":
         stage_encode(rd, args.checkpoint, args.latent)
-    elif args.stage == "gru":
-        stage_gru(rd, args.latent)
-    elif args.stage == "gru_probe":
-        stage_gru_probe(rd, args.checkpoint, args.gru_checkpoint)
     elif args.stage == "probe_static":
         stage_probe_static(rd, args.checkpoint)
     elif args.stage == "probe_raw":
@@ -160,8 +128,6 @@ def main():
     elif args.stage == "all":
         checkpoint_path = stage_encoder(rd)
         stage_encode(rd, checkpoint_path, args.latent)
-        stage_gru(rd, args.latent)
-        stage_gru_probe(rd, checkpoint_path)
         stage_probe_static(rd, checkpoint_path)
         stage_probe_raw(rd)
         stage_probe_baseline(rd, checkpoint_path)

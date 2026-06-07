@@ -37,27 +37,34 @@ SEED       = 42
 LATENT_DIM     = 32
 ENCODER_HIDDEN = [128, 128]
 DECODER_HIDDEN = [64, 64]
-ODE_HIDDEN     = [128, 128, 128]
 
 ## Training ##
-ENCODER_TYPE = "cnn"   # "mlp" or "cnn"
+ENCODER_TYPE   = "cnn"   # "mlp" or "cnn"
 ENCODER_LR     = 1e-3
 ENCODER_EPOCHS = 80
-ODE_LR         = 1e-4
-ODE_EPOCHS     = 80
 BATCH_SIZE     = 32
 PROBE_LR       = 5e-4
 PROBE_EPOCHS   = 200
 WINDOW_SIZE    = 25
 STRIDE         = 2
+
+
+# ── relegated ────────────────────────────────────────────────────────────────
+# Kept for reference / ablation recovery. Not used in the current pipeline.
+
+## NODE / GRU ##
+ODE_HIDDEN          = [128, 128, 128]
+ODE_LR              = 1e-4
+ODE_EPOCHS          = 80
 ODE_METHOD          = "rk4"
 CURRICULUM_WINDOWS  = [10]
 CURRICULUM_WEIGHTS  = [1.0]
 
 ## Joint training ##
-JOINT_LR      = 5e-4   # single optimizer over AE + ODE func
-JOINT_EPOCHS  = 80
-LAMBDA_RECON  = 1.0    # weight on T/S/O reconstruction loss
-LAMBDA_TRAJ   = 0.1    # weight on latent trajectory consistency loss
-LAMBDA_ODE = 0.5 # we don't use it, but its too much of a refactor to remove them imo
-LAMBDA_OXY = 0.5
+JOINT_LR     = 5e-4
+JOINT_EPOCHS = 80
+LAMBDA_RECON = 1.0
+LAMBDA_TRAJ  = 0.1
+LAMBDA_ODE   = 0.5
+LAMBDA_OXY   = 0.5
+# ─────────────────────────────────────────────────────────────────────────────
